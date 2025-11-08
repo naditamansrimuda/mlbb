@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Senarai Peserta MLBB - NADI Taman Sri Muda</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body class="p-4">
+
+<div class="container">
+  <h2 class="mb-3 text-center">Senarai Peserta MLBB - NADI Taman Sri Muda</h2>
+
+  <!-- Tempat untuk paparkan jumlah peserta -->
+  <p id="participant_count" class="font-weight-bold">Memuatkan data...</p>
+
+  <div id="students_list"></div>
+</div>
+
+<script>
+// Link CSV Publish to Web anda
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqId3-gIXvIgl8qq_tA9LbGjRdwQs3kHbjoBAvwB4iY781AUMWpWv37deHOKbnXGMs1SUCWgL_yvEY/pub?output=csv";
+
+// Fungsi untuk fetch dan paparkan table
+function loadStudents() {
+  Papa.parse(CSV_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+      const data = results.data;
+      if(data.length === 0){
+        $('#participant_count').text('Tiada peserta dijumpai.');
+        $('#students_list').html('');
+        return;
+      }
+
+      // Paparkan bilangan peserta
+      $('#participant_count').text('Jumlah peserta: ' + data.length);
+
+      // Buat table simple
+      let html = '<table class="table table-striped table-bordered">';
+      html += '<thead><tr>';
+      Object.keys(data[0]).forEach(h => html += '<th>'+h+'</th>');
+      html += '</tr></thead><tbody>';
+
+      data.forEach(row => {
+        html += '<tr>';
+        Object.values(row).forEach(cell => html += '<td>'+cell+'</td>');
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      $('#students_list').html(html);
+    },
+    error: function(err){
+      console.error(err);
+      $('#participant_count').text('Gagal memuatkan data. Periksa link CSV anda.');
+      $('#students_list').html('');
+    }
+  });
+}
+
+// Auto-load bila page dibuka
+$(document).ready(function(){
+  loadStudents();
+});
+</script>
+
+</body>
+</html>

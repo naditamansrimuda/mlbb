@@ -11,8 +11,15 @@
   .container, .container-sm {
     margin:0px;
   }
-  .search-bar {
-    margin-bottom: 15px;
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  #searchInput {
+    max-width: 250px;
   }
 </style>
 </head>
@@ -22,21 +29,11 @@
 
   <h4 class="mt-2 mb-3 font-weight-bold text-center">Senarai Peserta MLBB - NADI Taman Sri Muda</h4>
 
-  <!-- Search bar -->
-  <div class="search-bar row">
-    <div class="col-md-4 col-sm-12 mb-2">
-      <input type="text" id="searchName" class="form-control" placeholder="Cari Nama">
-    </div>
-    <div class="col-md-4 col-sm-12 mb-2">
-      <input type="text" id="searchIC" class="form-control" placeholder="Cari IC Number">
-    </div>
-    <div class="col-md-4 col-sm-12 mb-2">
-      <input type="text" id="searchTeam" class="form-control" placeholder="Cari Team">
-    </div>
+  <!-- Bar atas -->
+  <div class="top-bar">
+    <p id="participant_count" class="font-weight-bold mb-0">Memuatkan data...</p>
+    <input type="text" id="searchInput" class="form-control" placeholder="Cari nama, IC atau team">
   </div>
-
-  <!-- Tempat untuk paparkan jumlah peserta -->
-  <p id="participant_count" class="font-weight-bold">Memuatkan data...</p>
 
   <div id="students_list"></div>
 </div>
@@ -46,7 +43,7 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqId3-gIXvIgl8
 
 let allData = [];
 
-// Fungsi untuk paparkan data ke dalam jadual
+// Paparkan jadual
 function displayTable(data) {
   if (data.length === 0) {
     $('#students_list').html('<p>Tiada peserta dijumpai.</p>');
@@ -71,7 +68,7 @@ function displayTable(data) {
   $('#students_list').html(html);
 }
 
-// Fungsi untuk muat CSV
+// Muat data CSV
 function loadStudents() {
   Papa.parse(CSV_URL, {
     download: true,
@@ -89,17 +86,19 @@ function loadStudents() {
   });
 }
 
-// Fungsi carian
+// Carian tunggal
 function filterTable() {
-  const nameVal = $('#searchName').val().toLowerCase();
-  const icVal = $('#searchIC').val().toLowerCase();
-  const teamVal = $('#searchTeam').val().toLowerCase();
+  const searchVal = $('#searchInput').val().toLowerCase();
 
   const filtered = allData.filter(row => {
-    const nameMatch = row['Name'] ? row['Name'].toLowerCase().includes(nameVal) : false;
-    const icMatch = row['IC Number'] ? row['IC Number'].toLowerCase().includes(icVal) : false;
-    const teamMatch = row['Team'] ? row['Team'].toLowerCase().includes(teamVal) : false;
-    return nameMatch && icMatch && teamMatch;
+    const name = row['Name'] ? row['Name'].toLowerCase() : '';
+    const ic = row['IC Number'] ? row['IC Number'].toLowerCase() : '';
+    const team = row['Team'] ? row['Team'].toLowerCase() : '';
+    return (
+      name.includes(searchVal) ||
+      ic.includes(searchVal) ||
+      team.includes(searchVal)
+    );
   });
 
   displayTable(filtered);
@@ -107,9 +106,7 @@ function filterTable() {
 
 $(document).ready(function(){
   loadStudents();
-
-  // Bila user taip dalam search
-  $('#searchName, #searchIC, #searchTeam').on('input', filterTable);
+  $('#searchInput').on('input', filterTable);
 });
 </script>
 
